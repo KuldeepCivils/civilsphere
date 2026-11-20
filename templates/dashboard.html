@@ -13,6 +13,9 @@
   <p class="v2-sub">Today&rsquo;s news on the GS syllabus, explained with background, tied to past-year questions and turned into practice.</p>
   {% if total_events==0 %}<div class="hm-empty"><b>No data yet.</b> {% if is_admin %}<form method="post" action="/admin/quickstart" class="inline"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="hm-btn primary">Quick start: fetch news now</button></form>{% else %}<a href="/login">Log in as admin</a> and press Quick start.{% endif %}</div>{% endif %}
  </div>
+<svg class="v2-mart" viewBox="0 0 360 70" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><defs><linearGradient id="v2ms" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6e6c3"/><stop offset="1" stop-color="#e0c78f"/></linearGradient></defs>
+  <path d="M0 60 C90 40 220 66 360 36 V70 H0Z" fill="#ff9933" opacity=".85"/><path d="M0 64 C90 44 220 70 360 40 V70 H0Z" fill="#fff"/><path d="M0 68 C90 48 220 74 360 44 V70 H0Z" fill="#138808" opacity=".9"/>
+  <g transform="translate(212 8)"><rect x="0" y="34" width="128" height="22" fill="url(#v2ms)"/><g fill="#fffaf0">{% for i in range(12) %}<rect x="{{ 6 + i*10 }}" y="37" width="4" height="17"/>{% endfor %}</g><path d="M42 34 C42 8 86 8 86 34Z" fill="url(#v2ms)"/><path d="M64 10 V0" stroke="#8a6f2a" stroke-width="1.5"/><rect x="64" y="0" width="12" height="2.4" fill="#ff9933"/><rect x="64" y="2.4" width="12" height="2.4" fill="#fff"/><rect x="64" y="4.8" width="12" height="2.4" fill="#138808"/></g></svg>
  <svg class="v2-art" viewBox="0 0 640 220" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
   <defs>
    <linearGradient id="v2sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe2f6"/><stop offset="1" stop-color="#f7f1df"/></linearGradient>

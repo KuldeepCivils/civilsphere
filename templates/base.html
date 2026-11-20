@@ -40,4 +40,12 @@
  <main class="content">{% block content %}{% endblock %}</main>
  <footer>v{{ APP_VERSION }} · Timezone: {{ tz }}. Summaries here are source headlines/extracts and heuristic keyword mappings, not verified study notes. Always check the original source. Read/saved marks are stored only in this browser. Visitor counts are per browser (anonymous cookie, no names or IP addresses stored), not verified people; time counts only while the page is open and in use.</footer>
 </div></div>
+<nav class="tabbar" aria-label="Quick navigation">
+ <a href="/" class="{{ 'on' if path=='/' }}">{{ icon_key('chart', 22) }}<span>Home</span></a>
+ <a href="/news" class="{{ 'on' if path=='/news' or path.startswith('/event') }}">{{ icon_key('news', 22) }}<span>News</span></a>
+ <a href="/quiz" class="{{ 'on' if path.startswith('/quiz') }}">{{ icon_key('shield', 22) }}<span>Quiz</span></a>
+ <a href="/audio" class="{{ 'on' if path.startswith('/audio') }}">{{ icon_key('audio', 22) }}<span>Audio</span></a>
+ <button type="button" id="more" aria-label="More menu">{{ icon_key('book', 22) }}<span>More</span></button>
+</nav>
+<script>(function(){var m=document.getElementById("more"),b=document.getElementById("menu");if(m&&b)m.addEventListener("click",function(){b.click()})})();</script>
 <script src="/static/app.js?v={{ APP_VERSION }}"></script></body></html>
