@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block content %}<h1>Import links <small>EPW, monthly magazines and other sources with no feed</small></h1>{% if msg %}<p class="notice">{{ msg }}</p>{% endif %}
+<p class="muted">Economic &amp; Political Weekly has no public feed and much of it is behind a subscription. Monthly current-affairs magazines are copyrighted. So nothing is scraped or copied: you paste the article title and its web link (and, if you like, a short note in your own words). The story then appears in the normal GS sections with a link to the original.</p>
+<form method="post" action="/admin/import"><input type="hidden" name="csrf" value="{{ csrf }}">
+<label>Source <select name="source_id">{% for s in srcs %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}</select></label>
+<p><textarea name="lines" rows="9" style="width:100%" placeholder="One per line:&#10;Title of the article | https://www.epw.in/journal/... | optional note in your own words"></textarea></p>
+<button>Add links</button></form>
+<h2>Recently added by hand</h2>{% if recent %}<table><tr><th>Title</th><th>Source</th><th>Added</th></tr>{% for r in recent %}<tr><td><a href="{{ r.url }}" target="_blank" rel="noopener noreferrer">{{ r.title }}</a></td><td>{{ r.publisher }}</td><td>{{ r.retrieved_at }}</td></tr>{% endfor %}</table>{% else %}<p class="muted">Nothing yet.</p>{% endif %}{% endblock %}

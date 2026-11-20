@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block content %}
+<h1>Past-year questions <small>{{ rows|length }} in the bank</small></h1>
+{% if msg %}<p class="notice">{{ msg }}</p>{% endif %}
+<p class="tiny">These appear under matching news stories, in the Daily Quiz and in the Mock Paper, each tagged with its exam and year. Add questions copied from the official papers at upsc.gov.in. Keywords (comma separated) decide which news stories a question is shown with.</p>
+<form method="post" class="pyq-form"><input type="hidden" name="csrf" value="{{ csrf }}">
+<textarea name="text" rows="14" placeholder="EXAM: Prelims
+YEAR: 2019
+PAPER: GS2
+KEYWORDS: article 142, supreme court
+Q: Your question text here
+A) first option
+B) second option
+C) third option
+D) fourth option
+ANSWER: a
+EXPLANATION: one or two lines (optional)
+---
+EXAM: Mains
+YEAR: 2018
+PAPER: GS2
+KEYWORDS: delhi, lieutenant governor
+Q: Your Mains question here"></textarea>
+<button>Add questions</button></form>
+<h3>Stored questions</h3>
+{% for q in rows %}<div class="pyq"><p class="pyq-q">{{ q.question }}</p>{% if q.options %}<ol type="a" class="pyq-o">{% for o in q.options %}<li class="{{ 'ok' if loop.index0==q.answer_idx }}">{{ o }}</li>{% endfor %}</ol>{% endif %}<div class="pyq-tag">({{ q.tag }})</div><div class="tiny">Keywords: {{ q.keywords|join(', ') }}</div></div>{% endfor %}
+{% endblock %}

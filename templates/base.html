@@ -1,0 +1,43 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Kuldeep CivilSphere: an integrated UPSC platform{% endblock %}</title>
+<script>(function(){var d=document.documentElement;d.classList.add('js');try{var t=localStorage.getItem('theme');if(!t){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}d.dataset.theme=t}catch(e){d.dataset.theme='light'}})()</script>
+<link rel="stylesheet" href="/static/style.css?v={{ APP_VERSION }}"></head><body>
+<div class="shell">
+<aside class="side" id="side" aria-label="Primary">
+ <a class="brand" href="/"><svg class="logo" viewBox="0 0 64 56" aria-hidden="true"><path d="M4 30 C16 22 26 24 32 32 C38 24 48 22 60 30 V46 C48 40 38 42 32 50 C26 42 16 40 4 46Z" fill="#fff" opacity=".95"/><path d="M32 32 V50" stroke="#14305a" stroke-width="1.6"/><g transform="translate(32 15)"><circle r="11" fill="none" stroke="#f3c969" stroke-width="2"/><circle r="2.2" fill="#f3c969"/><g stroke="#f3c969" stroke-width="1">{% for a in (0,30,60,90,120,150) %}<line x1="-10" y1="0" x2="10" y2="0" transform="rotate({{ a }})"/>{% endfor %}</g></g></svg><b>Kuldeep CivilSphere</b><span>An integrated UPSC platform</span></a>
+ <nav class="nav">
+  <a href="/" class="{{ 'on' if path=='/' }}">{{ icon_key('chart') }}Home</a>
+  <a href="/news" class="{{ 'on' if path=='/news' }}">{{ icon_key('news') }}Daily News</a>
+  <a href="/brief" class="{{ 'on' if path.startswith('/brief') }}">{{ icon_key('doc') }}Daily Brief</a>
+  <a href="/quiz" class="{{ 'on' if path.startswith('/quiz') }}">{{ icon_key('book') }}Daily Quiz</a>
+  <a href="/audio" class="{{ 'on' if path.startswith('/audio') }}">{{ icon_key('audio') }}Audio News</a>
+  <a href="/pyq" class="{{ 'on' if path=='/pyq' }}">{{ icon_key('book') }}Past Questions</a>
+  <a href="/mock" class="{{ 'on' if path=='/mock' }}">{{ icon_key('book') }}Mock Paper</a>
+  <a href="/syllabus" class="{{ 'on' if path=='/syllabus' }}">{{ icon_key('book') }}Syllabus</a>
+  <h6>GS papers</h6>
+  <a href="/paper/GS1" class="{{ 'on' if path=='/paper/GS1' }}"><i class="dot" style="background:var(--gs1)"></i>GS I</a>
+  <a href="/paper/GS2" class="{{ 'on' if path=='/paper/GS2' }}"><i class="dot" style="background:var(--gs2)"></i>GS II</a>
+  <a href="/paper/GS3" class="{{ 'on' if path=='/paper/GS3' }}"><i class="dot" style="background:var(--gs3)"></i>GS III</a>
+  <a href="/paper/GS4" class="{{ 'on' if path=='/paper/GS4' }}"><i class="dot" style="background:var(--gs4)"></i>GS IV</a>
+  <h6>Admin</h6>
+  {% if is_admin %}<a href="/admin" class="{{ 'on' if path=='/admin' }}">{{ icon_key('shield') }}Control room</a><a href="/admin/sources" class="{{ 'on' if path=='/admin/sources' }}">{{ icon_key('globe') }}Sources</a><a href="/admin/import" class="{{ 'on' if path=='/admin/import' }}">{{ icon_key('globe') }}Import links</a><a href="/admin/pyq" class="{{ 'on' if path=='/admin/pyq' }}">{{ icon_key('book') }}Past questions</a>
+  <form method="post" action="/logout"><button class="link" style="padding:.5rem .65rem">Log out</button></form>{% else %}<a href="/login">{{ icon_key('shield') }}Admin login</a>{% endif %}
+ </nav>
+ {% if activity %}<div class="legend act"><b>Site activity</b> <span class="tiny">since {{ activity.since }}</span><br>
+  Visitors: <b id="act-visitors">{{ activity.visitors }}</b> &middot; <span title="A visit starts when you open the site in a new browser session or come back after 10+ minutes away">Visits</span>: <b id="act-visits">{{ activity.visits }}</b><br>
+  Time spent: <b id="act-time">{{ activity.time }}</b><br>This visit: <b id="act-this">{{ activity.this_visit }}</b></div>{% endif %}
+ <details class="legend"><summary><b>Colour guide</b></summary><i style="background:var(--gs1)"></i>GS I: heritage, history, geography, society<br><i style="background:var(--gs2)"></i>GS II: polity, governance, IR<br><i style="background:var(--gs3)"></i>GS III: economy, S&amp;T, environment, security<br><i style="background:var(--gs4)"></i>GS IV: ethics and integrity</details>
+<div class="skyline" aria-hidden="true"><svg viewBox="0 0 220 90" preserveAspectRatio="xMidYMax meet"><defs><linearGradient id="skg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3d7a0" stop-opacity=".0"/><stop offset="1" stop-color="#f3d7a0" stop-opacity=".35"/></linearGradient></defs><rect width="220" height="90" fill="url(#skg)"/><g fill="#e9dcc0" stroke="#ffffff55" stroke-width=".6"><rect x="30" y="58" width="160" height="22"/><path d="M80 58 C80 40 140 40 140 58Z"/><rect x="104" y="30" width="2" height="12" fill="#e9dcc0"/></g><g fill="#14305a" opacity=".35">{% for i in range(14) %}<rect x="{{ 36 + i*11 }}" y="62" width="4" height="16"/>{% endfor %}</g><rect x="106" y="30" width="14" height="3" fill="#ff9933"/><rect x="106" y="33" width="14" height="3" fill="#fff"/><rect x="106" y="36" width="14" height="3" fill="#138808"/><g fill="#2f6f4a" opacity=".85"><circle cx="18" cy="76" r="12"/><circle cx="202" cy="76" r="12"/></g></svg><p>Dream Big&hellip;<br>Prepare Better&hellip;</p></div>
+</aside>
+<div class="main">
+ <div class="top">
+  <button class="ib" id="menu" aria-label="Menu">&#9776;</button>
+  <input type="search" id="qlive" placeholder="Search headlines ( press / )" aria-label="Search headlines">
+  <span class="status {{ health.level }}" title="{{ health.detail }}"><i></i>{{ health.label }}</span>
+  <button class="ib" id="theme" title="Switch light / dark" aria-label="Switch theme">&#9680;</button>
+  <span class="date">{{ today }}</span><a class="avatar" href="{{ '/admin' if is_admin else '/login' }}" title="{{ 'Control room' if is_admin else 'Admin login' }}">KC</a>
+ </div>
+ <main class="content">{% block content %}{% endblock %}</main>
+ <footer>v{{ APP_VERSION }} · Timezone: {{ tz }}. Summaries here are source headlines/extracts and heuristic keyword mappings, not verified study notes. Always check the original source. Read/saved marks are stored only in this browser. Visitor counts are per browser (anonymous cookie, no names or IP addresses stored), not verified people; time counts only while the page is open and in use.</footer>
+</div></div>
+<script src="/static/app.js?v={{ APP_VERSION }}"></script></body></html>

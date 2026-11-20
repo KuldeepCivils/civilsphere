@@ -1,0 +1,4 @@
+{% extends "base.html" %}{% block content %}<h1>Daily briefs</h1>{% if msg %}<p class="notice">{{ msg }}</p>{% endif %}
+{% if is_admin %}<form method="post" action="/admin/brief/generate"><input type="hidden" name="csrf" value="{{ csrf }}"><label>Date <input type="date" name="date" value="{{ today }}"></label><button>Generate / regenerate (new version)</button></form>{% else %}<p class="muted">Admins can generate briefs.</p>{% endif %}
+{% if not rows %}<p class="muted">No briefs have been generated yet.</p>{% endif %}
+<ul>{% for r in rows %}<li><a href="/brief/{{ r.id }}">{{ r.period_start }}</a> — {{ r.n }} events, v{{ r.latest }}, generated {{ r.at }}</li>{% endfor %}</ul>{% endblock %}

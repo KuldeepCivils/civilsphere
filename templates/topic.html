@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% from "_newscard.html" import newscards with context %}{% block content %}
+<div class="bhead"><div><div class="btitle">{{ topic.name }}</div><div class="bsub"><span class="chip p-{{ topic.paper }}">{{ topic.paper_name }}</span> Syllabus topic &middot; {{ n }} event(s)</div></div></div>
+{% if topic.official_wording %}<blockquote>{{ topic.official_wording }}<br><small>Official wording from the UPSC syllabus (upsc.gov.in).</small></blockquote>{% else %}<p class="muted">No single official line: this is an application grouping.</p>{% endif %}
+{% if not n %}<p class="muted">No events mapped to this topic yet.</p>{% endif %}
+{% if n %}{% include "_toolbar.html" %}{% endif %}
+{{ newscards(sections, True) }}
+<p class="tiny">Topic matching is by keywords, so check low-percentage matches against the original link.</p>{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% block content %}
+<h1>Past Questions <small>UPSC Prelims 1995&ndash;2026 &middot; {{ total }} question(s)</small></h1>
+<form method="get" class="filters">
+ <select name="subject"><option value="">All subjects</option>{% for s, k in subs %}<option value="{{ s }}" {{ 'selected' if s==f.subject }}>{{ s }} ({{ k }})</option>{% endfor %}</select>
+ <select name="year"><option value="0">All years</option>{% for y in years %}<option value="{{ y }}" {{ 'selected' if y==f.year }}>{{ y }}</option>{% endfor %}</select>
+ <input type="search" name="q" placeholder="Word in question or option…" value="{{ f.q }}"><button>Filter</button>
+ <a class="chip" href="/mock?src=pyq&n=25&subject={{ f.subject|urlencode }}">Make a 25-question mock paper from {{ f.subject or 'all subjects' }}</a>
+</form>
+{% if not total %}<p class="muted">No questions match.</p>{% endif %}
+<div id="pq">
+{% for q in rows %}<article class="qz-card k-pyq" data-ans="{{ q.answer_idx }}">
+ <div class="qz-top"><span class="qz-no">{{ q.year }}</span>{% if q.subject %}<span class="qz-disc">{{ q.subject }}{% if q.topic %} &rsaquo; {{ q.topic }}{% endif %}</span>{% endif %}</div>
+ <p class="qz-q">{{ q.question }}</p>
+ <ol class="qz-opts" type="a">{% for o in q.options %}<li><button type="button" class="qz-opt" data-k="{{ loop.index0 }}">{{ o }}</button></li>{% endfor %}</ol>
+ <div class="pyq-tag">({{ q.tag }})</div>
+ <div class="qz-exp" hidden><b class="qz-verdict"></b>{% if q.explanation %} {{ q.explanation }}{% endif %}</div>
+</article>{% endfor %}
+</div>
+{% if pages>1 %}<p class="chips">{% if page>1 %}<a class="chip" href="?subject={{ f.subject|urlencode }}&year={{ f.year }}&q={{ f.q|urlencode }}&page={{ page-1 }}">&larr; Previous</a>{% endif %} <span class="muted">Page {{ page }} of {{ pages }}</span> {% if page<pages %}<a class="chip" href="?subject={{ f.subject|urlencode }}&year={{ f.year }}&q={{ f.q|urlencode }}&page={{ page+1 }}">Next &rarr;</a>{% endif %}</p>{% endif %}
+<p class="tiny">Questions are from the official UPSC Prelims papers (subject labels are our own); questions that depend on a picture, graph or map were left out. Confirm answer keys and wording at upsc.gov.in.</p>
+<script>
+(function(){var root=document.getElementById("pq");if(!root)return;
+root.addEventListener("click",function(ev){var b=ev.target.closest(".qz-opt");if(!b||b.disabled)return;var card=b.closest(".qz-card"),ans=+card.dataset.ans,pick=+b.dataset.k;
+ card.querySelectorAll(".qz-opt").forEach(function(x){x.disabled=true;var k=+x.dataset.k;if(k===ans)x.classList.add("right");else if(k===pick)x.classList.add("wrong")});
+ var e=card.querySelector(".qz-exp");e.hidden=false;e.querySelector(".qz-verdict").textContent=pick===ans?"Correct.":"Not quite. Answer: ("+"abcd"[ans]+")."});
+})();
+</script>{% endblock %}

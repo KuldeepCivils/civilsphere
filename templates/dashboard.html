@@ -1,0 +1,128 @@
+{% extends "base.html" %}{% block content %}
+{% set live = srcs|selectattr('verification','equalto','working')|selectattr('active')|sum(attribute='n') %}
+{% set cov30 = coverage[30] %}{% set tot30 = (cov30.values()|list|sum) %}
+{% set LBL = {'GS1':'GS-I','GS2':'GS-II','GS3':'GS-III','GS4':'GS-IV'} %}
+{% set COL = {'GS1':'#a37b2c','GS2':'#2f5d8a','GS3':'#3e7a58','GS4':'#7a5580'} %}
+{% set lead = (cov30.items()|sort(attribute=1, reverse=True)|list|first) if cov30 else None %}
+
+<section class="v2-hero">
+ <div class="v2-copy">
+  <p class="v2-eye">{{ greeting }} &middot; {{ today }}</p>
+  <h1>Kuldeep <span>CivilSphere</span></h1>
+  <p class="v2-tag">An integrated UPSC platform &middot; <b>Plan</b> &middot; <b>Prepare</b> &middot; <b>Excel</b></p>
+  <p class="v2-sub">Today&rsquo;s news on the GS syllabus, explained with background, tied to past-year questions and turned into practice.</p>
+  {% if total_events==0 %}<div class="hm-empty"><b>No data yet.</b> {% if is_admin %}<form method="post" action="/admin/quickstart" class="inline"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="hm-btn primary">Quick start: fetch news now</button></form>{% else %}<a href="/login">Log in as admin</a> and press Quick start.{% endif %}</div>{% endif %}
+ </div>
+ <svg class="v2-art" viewBox="0 0 640 220" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+  <defs>
+   <linearGradient id="v2sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe2f6"/><stop offset="1" stop-color="#f7f1df"/></linearGradient>
+   <linearGradient id="v2stone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6e6c3"/><stop offset="1" stop-color="#e6cf9f"/></linearGradient>
+   <linearGradient id="v2fade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#eaf2fb" stop-opacity="1"/><stop offset="1" stop-color="#eaf2fb" stop-opacity="0"/></linearGradient>
+  </defs>
+  <rect width="640" height="220" fill="url(#v2sky)"/>
+  <ellipse cx="560" cy="48" rx="46" ry="12" fill="#fff" opacity=".8"/><ellipse cx="590" cy="40" rx="28" ry="11" fill="#fff" opacity=".8"/>
+  <g transform="translate(120 52)">
+   <ellipse cx="260" cy="150" rx="300" ry="14" fill="#8db08f" opacity=".5"/>
+   <path d="M30 138 H490 V148 H30Z" fill="#dcc690"/><path d="M42 126 H478 V138 H42Z" fill="#e9d6a6"/>
+   <rect x="52" y="64" width="416" height="62" fill="url(#v2stone)"/>
+   <g fill="#fffaf0" stroke="#d6c28c" stroke-width="1.2">{% for i in range(26) %}<rect x="{{ 58 + i*16 }}" y="68" width="8" height="54" rx="2"/>{% endfor %}</g>
+   <rect x="46" y="54" width="428" height="12" fill="#ead9ab"/><rect x="46" y="49" width="428" height="5" fill="#d9a93a"/>
+   <path d="M200 49 C200 14 320 14 320 49Z" fill="url(#v2stone)" stroke="#d6c28c"/>
+   <path d="M260 16 V-6" stroke="#8a6f2a" stroke-width="2"/>
+   <g class="v2-flag"><rect x="260" y="-6" width="26" height="5" fill="#ff9933"/><rect x="260" y="-1" width="26" height="5" fill="#fff"/><rect x="260" y="4" width="26" height="5" fill="#138808"/><circle cx="273" cy="2" r="1.8" fill="none" stroke="#1a3a8a" stroke-width=".6"/></g>
+   <g fill="#4f8a5c"><circle cx="30" cy="132" r="22"/><circle cx="62" cy="140" r="18"/><circle cx="494" cy="132" r="22"/><circle cx="462" cy="141" r="17"/><circle cx="-8" cy="140" r="16"/></g>
+  </g>
+  <path d="M130 196 C260 150 420 214 640 150" fill="none" stroke="#ff9933" stroke-width="6" opacity=".9"/><path d="M130 204 C260 158 420 222 640 158" fill="none" stroke="#fff" stroke-width="6"/><path d="M130 212 C260 166 420 230 640 166" fill="none" stroke="#138808" stroke-width="6" opacity=".9"/>
+  <rect width="260" height="220" fill="url(#v2fade)"/>
+ </svg>
+</section>
+
+<div class="v2-quick">
+ <a href="/news"><span class="qi">{{ icon_key('news', 26) }}</span><div><b>Daily News</b><small>Stay updated</small></div><i>&rsaquo;</i></a>
+ <a href="/brief"><span class="qi">{{ icon_key('doc', 26) }}</span><div><b>Daily Brief</b><small>Top highlights</small></div><i>&rsaquo;</i></a>
+ <a href="/pyq"><span class="qi">{{ icon_key('chart', 26) }}</span><div><b>Past Questions</b><small>Prelims 1995&ndash;2026</small></div><i>&rsaquo;</i></a>
+ <a href="/quiz"><span class="qi">{{ icon_key('shield', 26) }}</span><div><b>Take Quiz</b><small>Test your knowledge</small></div><i>&rsaquo;</i></a>
+ <a href="/audio"><span class="qi">{{ icon_key('audio', 26) }}</span><div><b>Audio News</b><small>Hear it daily</small></div><i>&rsaquo;</i></a>
+</div>
+
+<div class="v2-r1">
+ <section class="v2-prog" id="v2prog" data-ids="{{ read_ids|join(',') }}">
+  <h2>Your Progress <span class="v2-up">&#8599;</span></h2>
+  <div class="v2-prog-in">
+   <svg viewBox="0 0 120 120" class="v2-ring" role="img" aria-label="Reading progress"><circle cx="60" cy="60" r="48" fill="none" stroke="#ffffff30" stroke-width="10"/><circle id="v2pr" cx="60" cy="60" r="48" fill="none" stroke="url(#v2g)" stroke-width="10" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 60 60)"/>
+    <defs><linearGradient id="v2g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3c969"/><stop offset=".5" stop-color="#6fcf97"/><stop offset="1" stop-color="#56a8f5"/></linearGradient></defs>
+    <text x="60" y="66" text-anchor="middle" id="v2pp">0%</text></svg>
+   <div class="v2-prog-t"><b id="v2pn">0 / {{ read_ids|length }}</b><span>priority stories read</span></div>
+  </div>
+  <p class="v2-prog-f">Reading progress for the latest day&rsquo;s priority news (marks are kept in this browser).</p>
+ </section>
+ <a class="v2-stat" href="/news?all=1"><span class="si">{{ icon_key('doc', 26) }}</span><b data-count="{{ total_events }}">0</b><span>Events collected</span><em class="up">{{ today_events }} dated today</em></a>
+ <a class="v2-stat" href="{{ '/admin/sources' if is_admin else '/' }}"><span class="si">{{ icon_key('globe', 26) }}</span><b data-count="{{ live }}">0</b><span>Live news feeds</span><em class="up">auto-refreshed</em></a>
+ <a class="v2-stat" href="/syllabus"><span class="si">{{ icon_key('compass', 26) }}</span><b data-count="{{ heat|selectattr('n')|list|length }}">0</b><span>Syllabus topics touched</span><em class="up">last 30 days</em></a>
+ <a class="v2-stat" href="/news"><span class="si">{{ icon_key('news', 26) }}</span><b data-count="{{ week_new }}">0</b><span>New this week</span>{% if week_pct is not none %}<em class="{{ 'up' if week_pct>=0 else 'dn' }}">{{ '↑' if week_pct>=0 else '↓' }} {{ week_pct|abs }}% vs last week</em>{% else %}<em class="up">&nbsp;</em>{% endif %}</a>
+ <blockquote class="v2-quote"><span>&ldquo;</span>Success in UPSC is not about working harder, but preparing smarter.<footer>&mdash; Kuldeep</footer>
+  <svg viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="#2f5d9a" stroke-width="2" opacity=".35"><circle cx="50" cy="50" r="40"/><circle cx="50" cy="50" r="7"/>{% for i in range(12) %}<path d="M50 50 L{{ (50 + 40*cos12[i])|round(1) }} {{ (50 + 40*sin12[i])|round(1) }}"/>{% endfor %}</g></svg></blockquote>
+</div>
+
+<div class="v2-r2">
+ <section class="v2-card v2-trend"><h2>{{ icon_key('chart', 18) }} News Trends <small>(last 30 days)</small></h2>
+  <svg viewBox="0 0 {{ trend.W }} {{ trend.H }}" class="v2-chart" role="img" aria-label="Relevant events per day, last 30 days">
+   <defs><linearGradient id="v2a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b82d8" stop-opacity=".35"/><stop offset="1" stop-color="#3b82d8" stop-opacity="0"/></linearGradient></defs>
+   {% for y,v in trend.yt %}<line x1="{{ trend.L }}" x2="{{ trend.W - 10 }}" y1="{{ y|round(1) }}" y2="{{ y|round(1) }}" stroke="#e3eaf3"/><text x="{{ trend.L - 6 }}" y="{{ (y+3)|round(1) }}" text-anchor="end">{{ v }}</text>{% endfor %}
+   <path d="{{ trend.area }}" fill="url(#v2a)"/><path class="v2-line" d="{{ trend.line }}" fill="none" stroke="#2f6fc4" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" pathLength="100"/>
+   {% for x,lbl in trend.xt %}<text x="{{ x|round(1) }}" y="{{ trend.H - 6 }}" text-anchor="{{ 'end' if loop.last else 'middle' }}">{{ lbl }}</text>{% endfor %}
+   <circle cx="{{ trend.last.x|round(1) }}" cy="{{ trend.last.y|round(1) }}" r="4.5" fill="#2f6fc4" stroke="#fff" stroke-width="2"/>
+   <g transform="translate({{ (trend.last.x-52)|round(1) }} {{ [trend.last.y-30, 2]|max|round(1) }})"><rect width="72" height="20" rx="6" fill="#1f4f9a"/><text x="36" y="14" text-anchor="middle" fill="#fff">{{ trend.last.n }} today</text></g>
+  </svg>
+  <p class="tiny">{{ trend.last.total }} UPSC-relevant events in the last 30 days.</p>
+ </section>
+
+ <section class="v2-card v2-top"><h2>{{ icon_key('news', 18) }} Top Stories <a href="/news?min_score=50">View All &rarr;</a></h2>
+  {% if top %}<ol>{% for e in top[:3] %}{% set p = e.paper or 'NA' %}<li><span class="n" style="--c:{{ COL.get(p,'#5f6b7a') }}">{{ loop.index }}</span><span class="th" style="--c:{{ COL.get(p,'#5f6b7a') }}">{{ icon(e.topic or '', 26) }}</span>
+   <div><a href="/event/{{ e.id }}">{{ e.headline }}</a><small>{{ LBL.get(p,'Unmapped') }}{% if e.topic %} &middot; {{ e.topic }}{% endif %}</small></div></li>{% endfor %}</ol>
+  {% else %}<p class="muted">No data yet.</p>{% endif %}
+ </section>
+
+ <section class="v2-card v2-ins"><h2>{{ icon_key('shield', 18) }} Key Insights <a href="/news">View Details &rarr;</a></h2>
+  <div class="v2-ins-g">
+   <div class="g1"><b>{% if week_pct is not none %}{{ '+' if week_pct>=0 }}{{ week_pct }}%{% else %}{{ week_new }}{% endif %}</b><span>Relevant news this week vs last week</span></div>
+   <div class="g2"><b>{{ notes_n }}</b><span>Stories explained in depth with notes</span></div>
+   <div class="g3"><b>{% if lead %}{{ ((lead[1]/tot30*100)|round|int) }}%{% else %}&ndash;{% endif %}</b><span>{% if lead %}of news falls in {{ LBL.get(lead[0], lead[0]) }}{% else %}News share appears with data{% endif %}</span></div>
+   <div class="g4"><b>Focus</b><span>{% if quiet %}Least covered: {{ quiet[0].name }}{% else %}&ndash;{% endif %}</span></div>
+  </div>
+ </section>
+</div>
+
+<div class="v2-r3">
+ <section class="v2-card v2-cov"><h2>{{ icon_key('compass', 18) }} Syllabus Coverage <a href="/syllabus">View Details &rarr;</a></h2>
+  {% for code in ['GS1','GS2','GS3','GS4'] %}{% set pc = paper_cov[code] %}{% set pct = ((pc.touched/pc.total*100)|round|int) if pc.total else 0 %}
+  <div class="v2-bar"><a href="/paper/{{ code }}">{{ LBL[code] }}</a><div><i data-w="{{ pct }}" style="background:{{ COL[code] }}"></i></div><b>{{ pct }}%</b></div>{% endfor %}
+  <p class="tiny">Share of syllabus topics that had news in the last 30 days.</p>
+ </section>
+ <section class="v2-card v2-links"><h2>{{ icon_key('book', 18) }} Quick Links</h2>
+  <div><a href="/syllabus">{{ icon_key('book', 26) }}<b>UPSC Syllabus</b></a><a href="/pyq">{{ icon_key('doc', 26) }}<b>Previous Year Papers</b></a><a href="/mock">{{ icon_key('shield', 26) }}<b>Mock Papers</b></a><a href="/news?min_score=50">{{ icon_key('news', 26) }}<b>Self Study Notes</b></a></div>
+ </section>
+ <section class="v2-card v2-sub2"><div><h2>{{ icon_key('audio', 18) }} Stay Updated</h2><p>A 30-minute news bulletin every day, in English, Hindi and regional languages.</p><a class="v2-btn" href="/audio">Listen now &rarr;</a></div>
+  <svg viewBox="0 0 120 150" aria-hidden="true"><g transform="rotate(8 60 75)"><rect x="22" y="8" width="76" height="134" rx="12" fill="#14305a"/><rect x="28" y="20" width="64" height="112" rx="6" fill="#fff"/><rect x="34" y="28" width="52" height="8" rx="3" fill="#2f6fc4"/><g fill="#c9d6e6"><rect x="34" y="44" width="52" height="5" rx="2"/><rect x="34" y="54" width="46" height="5" rx="2"/><rect x="34" y="64" width="52" height="5" rx="2"/><rect x="34" y="82" width="52" height="5" rx="2"/><rect x="34" y="92" width="40" height="5" rx="2"/></g><circle cx="60" cy="116" r="8" fill="#f3c969"/><path d="M57 112 l7 4 -7 4z" fill="#14305a"/></g></svg>
+ </section>
+</div>
+
+<section class="hm-strip">
+ <span class="dot {{ 'ok' if live else 'off' }}"></span>
+ <span>{% if last_job %}Last fetch: <b>{{ last_job.status }}</b> at {{ last_job.finished_at or last_job.started_at }}{% else %}No fetch has run yet{% endif %}</span>
+ {% if brief %}<a href="/brief/{{ brief.id }}">Latest brief: {{ brief.period_start }}</a>{% endif %}
+ {% if review %}<span>{{ review }} event(s) need review</span>{% endif %}
+ {% if is_admin %}<a href="/admin">Control room</a>{% endif %}
+</section>
+
+<script>
+(function(){var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+function counts(){document.querySelectorAll("[data-count]").forEach(function(el){var to=+el.getAttribute("data-count")||0;if(reduce||to===0){el.textContent=to.toLocaleString();return}
+ var t0=null,dur=1000;function step(t){if(!t0)t0=t;var p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,3);el.textContent=Math.round(to*e).toLocaleString();if(p<1)requestAnimationFrame(step)}requestAnimationFrame(step)})}
+function go(){counts();document.querySelectorAll(".v2-bar i").forEach(function(b){b.style.width=b.getAttribute("data-w")+"%"});
+ var box=document.getElementById("v2prog"),ids=(box.dataset.ids||"").split(",").filter(Boolean).map(Number),rd=[];try{rd=JSON.parse(localStorage.getItem("hub_read")||"[]").map(Number)}catch(e){}
+ var n=ids.filter(function(i){return rd.indexOf(i)>-1}).length,pct=ids.length?Math.round(100*n/ids.length):0;
+ document.getElementById("v2pr").setAttribute("stroke-dasharray",pct+" "+(100-pct));document.getElementById("v2pp").textContent=pct+"%";document.getElementById("v2pn").textContent=n+" / "+ids.length}
+if(reduce){go()}else{requestAnimationFrame(function(){requestAnimationFrame(go)})}})();
+</script>
+{% endblock %}

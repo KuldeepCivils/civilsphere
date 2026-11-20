@@ -1,0 +1,2 @@
+{% extends "base.html" %}{% block content %}<p>Versions: {% for v in versions %}<a href="?v={{ v.version }}">v{{ v.version }}</a> {% endfor %}</p>
+<p class="meta">Status: {{ cur.status }} · generated {{ cur.generated_at }} · {{ cur.generator }}</p>{{ cur.body_html|safe }}{% endblock %}

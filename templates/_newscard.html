@@ -1,0 +1,50 @@
+{% macro newscards(sections, show_date=False) %}
+{% set LBL = {'GS1':'GS-I','GS2':'GS-II','GS3':'GS-III','GS4':'GS-IV','NA':'Unmapped'} %}
+{% for key, topics in sections.items() %}<h2 class="bsec p-{{ key[0] }}">{{ key[1] }}</h2>
+{% for topic, items in topics.items() %}<h3 class="bsub2">{{ topic }}</h3>
+{% for it in items %}<article class="nc {{ key[0] }}" data-id="{{ it.event.id }}" id="e{{ it.event.id }}">
+ <header class="nc-h"><span class="nc-no">{{ it.no }}</span>
+  <div class="nc-t"><span class="nc-tag">{{ LBL[key[0]] }} &middot; {{ topic }}</span><h4>{{ it.event.headline }}</h4></div>
+  {% if it.image %}<div class="nc-img"><img src="{{ it.image.url }}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML=this.dataset.fallback" data-fallback="{{ icon(topic, 44)|e }}"><span class="credit">Image: {{ it.image.credit }}</span></div>{% else %}<div class="nc-img nc-ico">{{ icon(topic, 44) }}</div>{% endif %}
+  <div class="nc-act"><button class="ib" data-act="save" title="Save for later" aria-label="Save for later">&#9733;</button><button class="ib" data-act="read" title="Mark as read" aria-label="Mark as read">&#10003;</button><button class="ib" data-act="fold" title="Collapse or expand" aria-label="Collapse or expand">&#9662;</button></div></header>
+ <div class="nc-src">{% for s in it.sources %}Source: <a href="{{ s.url }}" rel="noopener noreferrer" target="_blank">{{ s.publisher }} &mdash; original link &#8599;</a>{% if not loop.last %} &nbsp;&middot;&nbsp; {% endif %}{% endfor %}{% if show_date %} &nbsp;&middot;&nbsp; {{ it.event.event_date }}{% endif %}{% if it.event.needs_review %} &nbsp;&middot;&nbsp; <i>mapping needs review</i>{% endif %}{% if it.event.data_origin!='live' %} &nbsp;&middot;&nbsp; <i>{{ it.event.data_origin|upper }}</i>{% endif %}</div>
+ <div class="nc-grid">
+  <section class="box b-news"><h5>Main News Item <small>({{ LBL[key[0]] }}: {{ topic }})</small></h5>
+   {% if it.ai %}{% if it.ai.summary %}{% for para in it.ai.summary.split("\n\n") if para.strip() %}<p class="lead">{{ para|rich }}</p>{% endfor %}{% endif %}{% if it.ai.sections and it.ai.points %}<h6 class="inbrief">In brief</h6>{% endif %}<ul>{% for p in it.ai.points %}<li>{{ p|rich }}</li>{% endfor %}</ul>{% if not it.ai.sections %}{% for ab in it.ai.about %}<div class="about"><h6>About: {{ ab.subject }}{% if ab.kind %} <span class="kind">{{ ab.kind }}</span>{% endif %}</h6>{% for para in ab.text.split("\n\n") if para.strip() %}<p>{{ para }}</p>{% endfor %}</div>{% endfor %}{% if it.ai.table %}<div class="itable-wrap"><h6>{{ it.ai.table.title }}</h6><div class="itable-scroll"><table class="itable"><thead><tr>{% for c in it.ai.table.columns %}<th>{{ c }}</th>{% endfor %}</tr></thead><tbody>{% for r in it.ai.table.rows %}<tr>{% for cell in r %}<td>{{ cell }}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div><span class="tiny">AI-generated table &middot; check dates and outcomes against the official source before use</span></div>{% endif %}{% if it.ai.background %}<div class="bg"><b>Background</b>{% for para in it.ai.background.split("\n\n") if para.strip() %}<p>{{ para }}</p>{% endfor %}</div>{% endif %}{% endif %}<span class="pill ai">AI-generated &middot; {{ it.ai.model }} &middot; story facts from the source text, background from general knowledge &middot; verify</span>
+   {% elif it.points %}<ul>{% for p in it.points %}<li>{{ p }}</li>{% endfor %}</ul><span class="pill">Publisher's own extract (short)</span>
+   {% else %}<p class="muted">The feed gave only a headline.</p>{% endif %}
+   {% if it.ctx.wiki and not (it.ai and it.ai.about) %}{% for w in it.ctx.wiki %}<div class="about"><h6>About: {{ w.title }} <span class="kind">encyclopedia</span></h6><p>{{ w.extract }}</p><span class="tiny">Wikipedia, CC BY-SA 4.0 &middot; <a href="{{ w.url }}" target="_blank" rel="noopener noreferrer">read more &#8599;</a></span></div>{% endfor %}{% endif %}
+   {% if it.ctx.coverage %}<details class="cov"><summary>Also reported by {{ it.ctx.coverage|length }} other report(s)</summary><ul>{% for c in it.ctx.coverage %}<li><a href="{{ c.url }}" target="_blank" rel="noopener noreferrer">{{ c.title }}</a>{% if c.publisher %} <span class="tiny">&mdash; {{ c.publisher }}</span>{% endif %}</li>{% endfor %}</ul><span class="tiny">Headlines and links only, found through Google News search. Open them to read the full reports.</span></details>{% endif %}
+   {% if it.ai and it.ai.about and it.ctx.wiki %}<p class="tiny">Reference used: {% for w in it.ctx.wiki %}<a href="{{ w.url }}" target="_blank" rel="noopener noreferrer">{{ w.title }}</a> (Wikipedia, CC BY-SA 4.0){% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  </section>
+  <section class="box b-rel"><h5>UPSC Relevance <small>(Static Linkage)</small></h5>
+   <p class="topic-line">{{ topic }}</p>
+   {% if it.ai %}<ul>{% for l in it.ai.linkage %}<li><b>{{ l.label }}:</b> {{ l.text }}</li>{% endfor %}{% if it.ai.theme %}<li><b>Mains core theme:</b> {{ it.ai.theme }}</li>{% endif %}</ul>{% endif %}
+   {% if it.ai %}<span class="pill ai">AI-generated static linkage &middot; verify articles/sections before use</span>
+   {% else %}<p class="muted">Constitutional/legal linkage is not generated yet.{% if is_admin %}</p>
+    {% if ai_enabled() %}<form method="post" action="/admin/ai/event/{{ it.event.id }}"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="mini">Generate AI notes</button></form>{% else %}<p class="muted">AI is off. Add GROQ_API_KEY to your private .env file and restart.</p>{% endif %}{% else %} Needs AI notes.</p>{% endif %}{% endif %}</section>
+ </div>
+ {% if it.ai and (it.ai.sections or it.ai.facts or it.ai.prelims) %}<section class="notes hw">
+  <h5 class="notes-h"><span class="hw-title">Self Study Notes</span> <small>revise from these, then check the source</small></h5>
+  {% if it.ai.facts %}<div class="facts"><h6>Facts at a glance</h6><dl>{% for f in it.ai.facts %}<div><dt>{{ f.label }}</dt><dd>{{ f.value|rich }}</dd></div>{% endfor %}</dl></div>{% endif %}
+  <div class="secs">{% for sc in it.ai.sections %}<div class="sec k-{{ sc.kind }}"><h6><i class="sdot"></i>{{ sc.heading }}</h6>
+   {% if sc.bullets %}<ul>{% for b in sc.bullets %}<li>{{ b|rich }}</li>{% endfor %}</ul>{% endif %}
+   {% if sc.table %}<div class="itable-wrap">{% if sc.table.title %}<h6>{{ sc.table.title }}</h6>{% endif %}<div class="itable-scroll"><table class="itable"><thead><tr>{% for c in sc.table.columns %}<th>{{ c }}</th>{% endfor %}</tr></thead><tbody>{% for r in sc.table.rows %}<tr>{% for cell in r %}<td>{{ cell|rich }}</td>{% endfor %}</tr>{% endfor %}</tbody></table></div></div>{% endif %}</div>{% endfor %}</div>
+  {% if it.ai.prelims %}<div class="prelims"><h6>Prelims pointers</h6><ul>{% for p in it.ai.prelims %}<li>{{ p|rich }}</li>{% endfor %}</ul></div>{% endif %}
+  <span class="pill ai">AI-generated self study note &middot; {{ it.ai.model }} &middot; story facts from the source text, background from general knowledge &middot; verify names, years, cases and figures</span>
+ </section>{% endif %}
+{% if it.pyq %}<section class="pyqs"><h5>Asked before in UPSC <small>(previous-year questions on this theme)</small></h5>
+  {% for q in it.pyq %}<div class="pyq"><p class="pyq-q">{{ q.question }}</p>
+   {% if q.options %}<ol type="a" class="pyq-o">{% for o in q.options %}<li class="{{ 'ok' if loop.index0==q.answer_idx }}">{{ o }}</li>{% endfor %}</ol>{% if q.explanation %}<p class="pyq-e"><b>Why:</b> {{ q.explanation }}</p>{% endif %}{% endif %}
+   <div class="pyq-tag">({{ q.tag }})</div>{% if q.subject %}<span class="tiny"> {{ q.subject }}{% if q.topic %} &rsaquo; {{ q.topic }}{% endif %}</span>{% endif %}</div>{% endfor %}
+  <p class="tiny">Questions from the official UPSC Prelims papers. Confirm wording, year and answer key at upsc.gov.in. Green option = answer.</p></section>{% endif %}
+ {% if it.ai and it.ai.perspective and not it.ai.sections %}<section class="box b-persp"><h5>Perspective <small>(history &amp; academic pointers)</small></h5>
+  <ul>{% for p in it.ai.perspective %}<li>{{ p }}</li>{% endfor %}</ul>
+  <span class="pill ai">AI-generated background &middot; names, years and cases must be verified in textbooks</span></section>{% endif %}
+ {% if it.ai and it.ai.overview and not it.ai.sections %}<section class="box b-glance"><h5>At a glance <small>(Political &middot; Economic &middot; Constitutional &middot; Historical &middot; Data)</small></h5>
+  <ul class="glance">{% for o in it.ai.overview %}<li><span class="gtag g-{{ o.tag }}">{{ o.tag }}</span>{{ o.text }}</li>{% endfor %}</ul>
+  <span class="pill ai">AI-generated summary &middot; {{ it.ai.model }} &middot; figures only from the source text; verify before use</span></section>
+ {% endif %}
+ {% if it.ai and (not it.ai.sections) and is_admin and ai_enabled() %}<form method="post" action="/admin/ai/event/{{ it.event.id }}" class="glance-add"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="mini">Upgrade this card with AI</button></form>{% endif %}
+ </article>{% endfor %}{% endfor %}{% endfor %}
+{% endmacro %}

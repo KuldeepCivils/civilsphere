@@ -1,0 +1,6 @@
+{% from "_newscard.html" import newscards %}
+<div class="bhead"><div><div class="btitle"><span class="y">Kuldeep</span> CivilSphere</div><div class="bsub">From global news to UPSC knowledge</div></div><div class="bdate"><b>{{ date_pretty }}</b><br>Daily News Brief</div></div>
+<div class="bband">Top Current Affairs &ndash; {{ n }} Key Development{{ '' if n==1 else 's' }}</div>
+{% for w in warnings %}<p class="warn">Warning: {{ w }}</p>{% endfor %}
+{{ newscards(sections) }}
+<p class="muted tiny">Generated {{ generated_at }} by {{ generator }}. Left boxes show the publisher's own feed text unless marked AI-generated; right boxes show keyword-based syllabus mapping unless marked AI-generated. Verify with the original sources.</p>

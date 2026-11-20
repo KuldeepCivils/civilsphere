@@ -1,0 +1,2 @@
+{% extends "base.html" %}{% block content %}<h1>Syllabus taxonomy</h1><p class="muted">Starter taxonomy seeded from your syllabus file. Topic names/keywords are application tags; verify against the current UPSC notification.</p>
+{% for p in papers %}<p><a href="/paper/{{ p.code }}">{{ p.name }}</a> — {{ p.official_wording }}</p>{% endfor %}{% endblock %}

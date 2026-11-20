@@ -1,0 +1,14 @@
+{% extends "base.html" %}{% from "_newscard.html" import newscards with context %}{% block content %}
+{% set PC = {'GS1':'#a37b2c','GS2':'#2f5d8a','GS3':'#3e7a58','GS4':'#7a5580'} %}
+<div class="bhead" style="border-left:6px solid {{ PC.get(paper.code,'#5f6b7a') }}"><div><div class="btitle">{{ paper.name }}</div><div class="bsub">{{ n }} relevant stor{{ 'y' if n==1 else 'ies' }} in the last {{ 'day' if days==1 else days ~ ' days' }}, grouped by syllabus topic</div></div></div>
+{% if paper.official_wording %}<blockquote>{{ paper.official_wording }}<br><small>Official wording from the UPSC syllabus (upsc.gov.in).</small></blockquote>{% endif %}
+<div class="chips">{% for d, l in ((1,'Today'),(7,'7 days'),(30,'30 days'),(90,'90 days'),(365,'1 year')) %}<a class="chip {{ 'on' if days==d }}" href="/paper/{{ paper.code }}?days={{ d }}">{{ l }}</a>{% endfor %}
+ <a class="chip" href="/news?paper={{ paper.code }}">Open in Daily News</a></div>
+<div class="chips">{% for t in topics %}<a class="chip {{ 'on' if t.n }}" href="/topic/{{ t.id }}" title="Open all stories on this topic">{{ t.name }} <b>{{ t.n }}</b></a>{% endfor %}</div>
+{% if not n %}<p class="muted">No relevant stories for this paper in this period. Try a longer period, or fetch news from the Admin page.</p>
+{% else %}{% include "_toolbar.html" %}
+<details class="idx" open><summary>INDEX <small class="muted">({{ n }} stories &middot; click to jump)</small></summary><div class="idx-cols">
+{% for key, tps in sections.items() %}<div style="--c:{{ PC.get(key[0],'#5f6b7a') }}">{% for topic, items in tps.items() %}<h5>{{ topic }}</h5><ul>{% for it in items %}<li><a href="#e{{ it.event.id }}">{{ it.event.headline }}</a>{% if it.ai %}<span class="ai-dot" title="Study note written"></span>{% endif %}</li>{% endfor %}</ul>{% endfor %}</div>{% endfor %}
+</div></details>
+{{ newscards(sections, True) }}{% endif %}
+<p class="tiny">Stories are placed in a paper by keyword matching on the syllabus, so check the original link when a match looks odd.</p>{% endblock %}

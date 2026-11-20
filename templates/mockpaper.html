@@ -1,0 +1,37 @@
+{% extends "base.html" %}{% block content %}
+<h1 class="noprint">Mock Paper <small>a Prelims-style test booklet made from your stored daily quizzes</small></h1>
+<form method="get" class="filters noprint">
+ <label>Questions from <select name="src"><option value="news" {{ 'selected' if src!='pyq' }}>this week's news quizzes + related past questions</option><option value="pyq" {{ 'selected' if src=='pyq' }}>past UPSC Prelims papers only</option></select></label>
+ <label>Questions <input type="number" name="n" min="5" max="100" value="{{ n }}"></label>
+ <label>News: last <input type="number" name="days" min="1" max="60" value="{{ days }}"> days</label>
+ <label>Subject <select name="subject"><option value="">All</option>{% for s, k in subs %}<option value="{{ s }}" {{ 'selected' if s==subject }}>{{ s }} ({{ k }})</option>{% endfor %}</select></label>
+ <label>Years <input type="number" name="y0" min="1995" max="2026" value="{{ y0 }}"> to <input type="number" name="y1" min="1995" max="2026" value="{{ y1 }}"></label>
+ <button>Make paper</button>
+ {% if qs %}<button type="button" onclick="window.print()">Print / save as PDF</button>{% endif %}
+</form>
+{% if not qs %}<p class="muted">No multiple-choice questions stored for this period. Generate the Daily Quiz on the Daily Quiz page first (the admin can do this for each day).</p>
+{% else %}
+<p class="tiny noprint">Built from stored AI-generated quiz questions plus previous-year UPSC questions on the same themes (each previous-year question carries its exam and year under it). The AI ones are not verified: check the answer key against your books. Use the browser's Print, then "Save as PDF" if you want a file.</p>
+<section class="pp">
+ <header class="pp-head"><h2>Kuldeep CivilSphere &middot; Practice Test</h2>
+  <div class="pp-meta"><span>Time allowed: {{ minutes }} minutes</span><span>Maximum marks: {{ marks }}</span></div></header>
+ <ol class="pp-ins">
+  <li>This booklet has {{ qs|length }} items (questions). Each item has four responses; select the one you consider best. Choose only ONE.</li>
+  <li>All items carry equal marks (2 each).</li>
+  <li>There is a penalty for wrong answers: one-third of the marks of the question is deducted for each wrong answer. A blank answer carries no penalty.</li>
+  <li>Marking more than one answer is treated as wrong.</li>
+ </ol>
+ <div class="pp-qs">
+ {% for q in qs %}<div class="pp-q"><span class="pp-n">{{ loop.index }}.</span><div><p>{{ q.question }}</p>{% if q.pyq_tag %}<div class="pyq-tag">({{ q.pyq_tag }})</div>{% endif %}
+  <ol type="a" class="pp-o">{% for o in q.options %}<li>{{ o }}</li>{% endfor %}</ol></div></div>{% endfor %}
+ </div>
+ {% if mains %}<h3 class="pp-b">Part B &middot; Descriptive questions (previous-year Mains questions on the same themes)</h3>
+ {% for q in mains %}<div class="pp-q pp-m"><span class="pp-n">B{{ loop.index }}.</span><div><p>{{ q.question }}</p><div class="pyq-tag">({{ q.tag }})</div></div></div>{% endfor %}{% endif %}
+ <p class="pp-score noprint">Score yourself: right &times; 2 &minus; wrong &times; 0.67 = marks.</p>
+</section>
+<section class="pp pp-key">
+ <h2>Answer key &amp; explanations</h2>
+ {% for q in qs %}<div class="pp-k"><b>{{ loop.index }}. ({{ 'abcd'[q.answer_idx] }})</b> {{ q.options[q.answer_idx] }}<br><span>{{ q.explanation }}</span>
+  {% if q.pyq_tag %}<br><i class="tiny">{{ q.pyq_tag }}{% if q.subject %} &middot; {{ q.subject }} &rsaquo; {{ q.topic }}{% endif %}</i>{% elif q.headline %}<br><i class="tiny">Source story: {{ q.headline }} &middot; {{ q.quiz_date }}</i>{% endif %}</div>{% endfor %}
+</section>
+{% endif %}{% endblock %}

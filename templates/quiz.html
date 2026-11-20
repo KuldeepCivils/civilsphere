@@ -1,0 +1,38 @@
+{% extends "base.html" %}{% block content %}
+<p class="tiny"><a href="/mock">Make a printable mock question paper from these quizzes &rarr;</a></p>
+<h1>Daily Quiz <small>{{ qdate }} &middot; built from the day's news, with a post-graduate theory layer</small></h1>
+{% if msg %}<p class="notice">{{ msg }}</p>{% endif %}
+{% if is_admin %}<form method="post" action="/admin/quiz/generate" class="filters"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="date" name="date" value="{{ qdate }}"><button>{{ 'Regenerate' if qz else 'Generate' }} quiz for this date</button>{% if not ai_enabled() %}<span class="muted">AI is off: add GROQ_API_KEY to your private .env first.</span>{% endif %}</form>{% endif %}
+{% if past %}<div class="chips">{% for p in past %}<a class="chip {{ 'on' if p.quiz_date==qdate }}" href="/quiz?date={{ p.quiz_date }}">{{ p.quiz_date }} ({{ p.n }})</a>{% endfor %}</div>{% endif %}
+{% if not qz and not fallback %}<p class="muted">No quiz for this date yet. It is built automatically after news is fetched and AI notes are written (needs the AI key in .env). {% if is_admin %}You can also press the button above.{% else %}The admin can also generate it from this page.{% endif %}</p>
+{% else %}
+{% if fallback %}<p class="notice">The AI quiz for this date is not built yet, so here are previous-year UPSC Prelims questions on the latest news themes. {% if is_admin %}Press the button above to build the full AI quiz.{% else %}The full AI quiz appears after the next news refresh.{% endif %}</p>
+{% else %}
+<p class="tiny">Questions are AI-generated ({{ qz.model }}) from the day's headlines and short extracts, then checked only for format, not for truth. Verify facts at the original link and concepts in your textbooks. For Master's-level reading, search the concept name on <a href="https://egyankosh.ac.in/" target="_blank" rel="noopener noreferrer">eGyanKosh (IGNOU's free material)</a>; I do not quote IGNOU unit or page numbers because they cannot be verified here.</p>{% endif %}
+<div class="qz-score" id="qzscore" aria-live="polite">Answered 0 / <span id="qztotal">0</span> &middot; correct 0</div>
+<div id="qz" data-date="{{ qdate }}">
+{% set LBL = {'news':'News fact','prelims':'Prelims-style','pyq':'Previous year','theory':'Theory link','analytical':'Mains analytical'} %}
+{% for q in qs %}<article class="qz-card k-{{ q.kind }}" data-i="{{ loop.index0 }}" {% if q.options %}data-ans="{{ q.answer_idx }}"{% endif %}>
+ <div class="qz-top"><span class="qz-no">Q{{ loop.index }}</span><span class="qz-kind">{{ LBL[q.kind] }}</span>{% if q.discipline %}<span class="qz-disc">{{ q.discipline }} &middot; {{ q.concept }}</span>{% endif %}{% if q.paper %}<span class="qz-gs">{{ q.paper|replace('GS','GS ') }}</span>{% endif %}</div>
+ <p class="qz-q">{{ q.question }}</p>{% if q.pyq_tag %}<div class="pyq-tag">({{ q.pyq_tag }})</div>{% endif %}
+ {% if q.options %}<ol class="qz-opts" type="A">{% for o in q.options %}<li><button type="button" class="qz-opt" data-k="{{ loop.index0 }}">{{ o }}</button></li>{% endfor %}</ol>
+ <div class="qz-exp" hidden><b class="qz-verdict"></b> {{ q.explanation }}</div>
+ {% elif q.kind=='pyq' %}<p class="tiny">Mains question: write your own answer in about 150 words, then compare with a standard source.</p>
+ {% else %}<details class="qz-model"><summary>Show model-answer points (try writing 150 words first)</summary><ul>{% for p in q.model_points %}<li>{{ p }}</li>{% endfor %}</ul></details>{% endif %}
+ <div class="qz-from tiny">From: {% if q.event_id %}<a href="/event/{{ q.event_id }}">{{ q.headline }}</a>{% endif %} &middot; <span class="pill ai">{{ 'Past UPSC question' if q.kind=='pyq' else 'AI-generated' }}</span></div>
+</article>{% endfor %}
+</div>
+<script>
+(function(){var root=document.getElementById("qz");if(!root)return;var key="hub_quiz_"+root.dataset.date,st={};
+try{st=JSON.parse(localStorage.getItem(key)||"{}")}catch(e){}
+var cards=root.querySelectorAll(".qz-card[data-ans]");document.getElementById("qztotal").textContent=cards.length;
+function score(){var a=0,c=0;cards.forEach(function(k){var v=st[k.dataset.i];if(v!==undefined){a++;if(+v===+k.dataset.ans)c++}});
+ document.getElementById("qzscore").innerHTML="Answered "+a+" / "+cards.length+" &middot; correct "+c+(a===cards.length&&a?" &middot; <b>Score "+c+"/"+cards.length+"</b>":"")}
+function reveal(card,pick){var ans=+card.dataset.ans;card.querySelectorAll(".qz-opt").forEach(function(b){b.disabled=true;var k=+b.dataset.k;if(k===ans)b.classList.add("right");else if(k===pick)b.classList.add("wrong")});
+ var e=card.querySelector(".qz-exp");e.hidden=false;e.querySelector(".qz-verdict").textContent=pick===ans?"Correct.":"Not quite."}
+cards.forEach(function(card){var p=st[card.dataset.i];if(p!==undefined)reveal(card,+p)});score();
+root.addEventListener("click",function(ev){var b=ev.target.closest(".qz-opt");if(!b||b.disabled)return;var card=b.closest(".qz-card");st[card.dataset.i]=+b.dataset.k;
+ try{localStorage.setItem(key,JSON.stringify(st))}catch(e){}reveal(card,+b.dataset.k);score()});
+})();
+</script>
+{% endif %}{% endblock %}

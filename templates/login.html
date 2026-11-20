@@ -1,0 +1,4 @@
+{% extends "base.html" %}{% block content %}<h1>Admin login</h1>
+{% if not enabled %}<p class="warn">Admin is disabled. Set <code>ADMIN_PASSWORD</code> and a <code>SESSION_SECRET</code> (16+ characters) in your private <code>.env</code> file, then restart.</p>{% endif %}
+{% if error %}<p class="warn">{{ error }}</p>{% endif %}
+<form method="post" action="/login"><label>Password <input type="password" name="password" autocomplete="current-password" required></label><button>Log in</button></form>{% endblock %}

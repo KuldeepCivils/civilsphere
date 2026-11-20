@@ -1,0 +1,10 @@
+{% macro newstable(sections, show_date=False) %}
+{% for key, topics in sections.items() %}<h2 class="bsec p-{{ key[0] }}">{{ key[1] }}</h2>
+{% for topic, items in topics.items() %}<table class="ntable {{ key[0] }}"><caption>{{ topic }}</caption>
+<thead><tr><th class="c-no">#</th><th class="c-ico">Image</th><th>News &amp; brief meaning</th></tr></thead><tbody>
+{% for it in items %}<tr><td class="c-no">{{ it.no }}</td><td class="c-ico">{% if it.image %}<img src="{{ it.image.url }}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML=this.dataset.fallback" data-fallback="{{ icon(topic)|e }}"><div class="credit">Image: {{ it.image.credit }}</div>{% else %}{{ icon(topic) }}{% endif %}</td>
+<td><b>{{ it.event.headline }}</b>
+<div class="mean">{% if it.meaning %}{{ it.meaning }}{% else %}<span class="muted">No feed summary; open the original link.</span>{% endif %}</div>
+<div class="tiny">{% if show_date %}{{ it.event.event_date }} · {% endif %}{% for s in it.sources %}Source: <a href="{{ s.url }}" rel="noopener noreferrer" target="_blank">{{ s.publisher }} &mdash; original link &#8599;</a>{% if not loop.last %} · {% endif %}{% endfor %}{% if it.event.needs_review %} · <i>mapping needs review</i>{% endif %}{% if it.event.data_origin!='live' %} · <i>{{ it.event.data_origin|upper }}</i>{% endif %}</div></td></tr>{% endfor %}
+</tbody></table>{% endfor %}{% endfor %}
+{% endmacro %}

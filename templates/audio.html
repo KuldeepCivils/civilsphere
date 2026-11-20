@@ -1,0 +1,49 @@
+{% extends "base.html" %}{% block content %}
+<h1>Audio News <small>{{ d }} &middot; about 30 minutes, story by story</small></h1>
+{% if msg %}<p class="notice">{{ msg }}</p>{% endif %}
+<div class="chips">{% for code, v in langs.items() %}<a class="chip {{ 'on' if code==lang }}" href="/audio?date={{ d }}&lang={{ code }}" title="{{ v[0] }}">{{ v[1] }}{% if code in ready %} &#9679;{% endif %}</a>{% endfor %}</div>
+{% if days|length > 1 %}<p class="tiny">Other days: {% for x in days %}<a href="/audio?date={{ x }}&lang={{ lang }}">{{ x }}</a>{% if not loop.last %} &middot; {% endif %}{% endfor %}</p>{% endif %}
+
+{% if clips %}
+<section class="au" id="au" data-date="{{ d }}" data-lang="{{ lang }}">
+ <div class="au-now"><div class="au-kicker" id="auKick">Ready to play</div><div class="au-title" id="auTitle">{{ clips[0].headline }}</div>
+  <div class="au-ctl"><button type="button" id="auPrev" title="Previous story" aria-label="Previous story">&#9198;</button><button type="button" id="auPlay" class="big" aria-label="Play or pause">&#9654;</button><button type="button" id="auNext" title="Next story" aria-label="Next story">&#9197;</button>
+   <label class="tiny">Speed <select id="auSpeed"><option>0.8</option><option selected>1</option><option>1.15</option><option>1.3</option><option>1.5</option></select></label>
+   <a class="hm-btn" href="/audio/full/{{ d }}/{{ lang }}.mp3">Download full MP3</a></div>
+  <div class="au-bar"><div id="auFill"></div></div><div class="tiny"><span id="auPos">0:00</span> / {{ fmt(total) }} &middot; {{ n_items }} stories{% if b and b.error %} &middot; {{ b.error }}{% endif %}</div>
+  <audio id="auEl" preload="auto"></audio></div>
+ <ol class="au-list" id="auList">{% for c in clips %}<li data-i="{{ loop.index0 }}" data-src="/audio/clip/{{ d }}/{{ lang }}/{{ c.file }}" data-start="{{ c.start|round(1) }}" data-len="{{ c.seconds|round(1) }}" class="k-{{ c.kind }}">
+  <button type="button" class="au-go"><span class="au-t">{{ fmt(c.start) }}</span><span class="au-h">{{ c.headline }}</span><span class="au-d">{{ fmt(c.seconds) }}{% if c.kind=='item' and c.seconds>46 %} &middot; long{% endif %}</span></button>
+  <details class="au-tx"><summary>Read along</summary><p>{{ c.text }}</p></details></li>{% endfor %}</ol>
+</section>
+<script>
+(function(){var root=document.getElementById("au");if(!root)return;var el=document.getElementById("auEl"),items=[].slice.call(document.querySelectorAll("#auList li")),cur=0,key="au_"+root.dataset.date+root.dataset.lang;
+var total={{ total|round(1) }},playBtn=document.getElementById("auPlay");
+function load(i,play){cur=Math.max(0,Math.min(items.length-1,i));items.forEach(function(li,k){li.classList.toggle("on",k===cur)});var li=items[cur];el.src=li.dataset.src;el.playbackRate=+document.getElementById("auSpeed").value;
+ document.getElementById("auTitle").textContent=li.querySelector(".au-h").textContent;document.getElementById("auKick").textContent="Story "+(cur+1)+" of "+items.length;
+ try{localStorage.setItem(key,cur)}catch(e){}if(play)el.play();}
+function tick(){var li=items[cur],t=(+li.dataset.start)+(el.currentTime||0);document.getElementById("auFill").style.width=(total?100*t/total:0)+"%";var m=Math.floor(t/60),s=Math.floor(t%60);document.getElementById("auPos").textContent=m+":"+(s<10?"0":"")+s}
+el.addEventListener("timeupdate",tick);el.addEventListener("ended",function(){if(cur<items.length-1)load(cur+1,true);else playBtn.innerHTML="&#9654;"});
+el.addEventListener("play",function(){playBtn.innerHTML="&#9208;"});el.addEventListener("pause",function(){playBtn.innerHTML="&#9654;"});
+playBtn.onclick=function(){if(!el.src)load(cur,true);else if(el.paused)el.play();else el.pause()};
+document.getElementById("auPrev").onclick=function(){load(el.currentTime>3?cur:cur-1,!el.paused)};document.getElementById("auNext").onclick=function(){load(cur+1,!el.paused)};
+document.getElementById("auSpeed").onchange=function(){el.playbackRate=+this.value};
+items.forEach(function(li,k){li.querySelector(".au-go").onclick=function(){load(k,true)}});
+var saved=0;try{saved=+localStorage.getItem(key)||0}catch(e){}load(saved,false);})();
+</script>
+{% elif running %}
+<p class="notice" id="auBusy">Building the bulletin&hellip; <span id="auPhase">starting</span>. This takes several minutes. Keep this page open.</p>
+{% else %}
+<p class="muted">No {{ langs[lang][0] }} bulletin for {{ d }} yet.</p>
+{% endif %}
+
+{% if can_build %}<form method="post" action="/audio/generate" class="filters"><input type="hidden" name="csrf" value="{{ csrf_tok }}"><input type="hidden" name="lang" value="{{ lang }}"><input type="date" name="date" value="{{ d }}">
+ <button {{ 'disabled' if running }}>{{ 'Rebuild' if clips else 'Build' }} {{ langs[lang][0] }} bulletin</button>
+ {% if b and b.status=='failed' and not running %}<span class="warn">Last try failed: {{ b.error }}</span>{% endif %}</form>
+{% elif not clips %}<p class="tiny">The bulletin is built by the admin from the computer running the app.</p>{% endif %}
+<p class="tiny">Voices are free neural voices (Microsoft Edge voices; Google voices as backup). Only public news text is sent to them. Scripts for regional languages are AI translations: listen with care and verify facts from the original news. Each story is about 30 seconds (45 at most).</p>
+{% if running or (b and b.status=='building') %}<script>
+(function(){var p=document.getElementById("auPhase");function poll(){fetch("/audio/status?date={{ d }}&lang={{ lang }}").then(function(r){return r.json()}).then(function(s){if(p)p.textContent=s.phase||"working";
+ if(!s.running){location.href="/audio?date={{ d }}&lang={{ lang }}";return}setTimeout(poll,3000)}).catch(function(){setTimeout(poll,5000)})}poll()})();
+</script>{% endif %}
+{% endblock %}

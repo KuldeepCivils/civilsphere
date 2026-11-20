@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% from "_newscard.html" import newscards with context %}{% block title %}{{ e.headline }}{% endblock %}{% block content %}
+{% if msg %}<p class="notice">{{ msg }}</p>{% endif %}{{ newscards(sections, True) }}
+<h1 style="display:none">{{ e.headline }}</h1>
+<p class="meta tiny">Event date {{ e.event_date }} · first seen {{ e.first_seen_at }} · status {{ e.status }} · origin <b>{{ e.data_origin }}</b></p>
+{% if e.needs_review %}<p class="warn">Low-confidence syllabus mapping: needs human review.</p>{% endif %}
+<div class="evx">
+<details class="evd"><summary>Syllabus mapping{% if maps %} ({{ maps|length }}){% endif %}</summary>
+{% if maps %}<table><tr><th></th><th>Paper</th><th>Topic</th><th>Confidence</th><th>Matched terms</th></tr>
+{% for m in maps %}<tr><td>{{ 'Primary' if m.is_primary else 'Secondary' }}</td><td>{{ m.paper_name }}</td><td><a href="/topic/{{ m.topic_id }}">{{ m.topic }}</a></td><td>{{ '%.0f'|format(m.confidence*100) }}%</td><td>{{ m.matched_terms }}</td></tr>
+{% if m.official_wording %}<tr><td></td><td colspan="4" class="muted">Official wording: {{ m.official_wording }}</td></tr>{% endif %}{% endfor %}</table>
+<p class="tiny">Heuristic keyword method, not verified.</p>
+{% else %}<p class="muted">No syllabus topic matched. This item may not be UPSC-relevant, or keywords need extending.</p>{% endif %}</details>
+<details class="evd"><summary>Relevance score {{ e.relevance_score }}/100</summary>
+{% if bd %}<p class="muted">Weighted model. Repeated coverage by one publisher does not raise the score ({{ bd.distinct_sources }} distinct source(s)).</p>
+<ul>{% for k,v in bd.parts.items() %}<li>{{ k }}: {{ v }} &times; weight {{ bd.weights[k] }}</li>{% endfor %}</ul>{% endif %}</details>
+<details class="evd"><summary>Sources ({{ srcs|length }})</summary>
+{% for s in srcs %}<article class="src"><b>{{ s.publisher }}</b> <span class="meta">{{ s.category }} &middot; published {{ s.published_at or 'unknown' }} &middot; {{ s.data_origin }}</span><br>
+<a href="{{ s.url }}" rel="noopener noreferrer" target="_blank">{{ s.title }}</a>{% if s.snippet %}<p class="extract">Feed extract: &ldquo;{{ s.snippet }}&rdquo;</p>{% endif %}</article>{% endfor %}</details>
+</div>
+{% if is_admin %}<section class="card"><h2>Admin</h2>
+<form method="post" action="/admin/event/{{ e.id }}/approve" class="inline"><input type="hidden" name="csrf" value="{{ csrf }}"><button>Mark reviewed</button></form>
+<form method="post" action="/admin/event/{{ e.id }}/reject" class="inline"><input type="hidden" name="csrf" value="{{ csrf }}"><button>Reject</button></form>
+<form method="post" action="/admin/event/{{ e.id }}/merge"><input type="hidden" name="csrf" value="{{ csrf }}"><label>Merge into <select name="into">{% for o in others %}<option value="{{ o.id }}">#{{ o.id }} {{ o.headline[:80] }}</option>{% endfor %}</select></label><button>Merge</button></form></section>{% endif %}
+{% endblock %}
