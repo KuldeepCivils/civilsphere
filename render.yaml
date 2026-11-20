@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: kuldeep-civilsphere
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: APP_TIMEZONE
+        value: Asia/Kolkata
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false
